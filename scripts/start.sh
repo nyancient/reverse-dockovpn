@@ -139,6 +139,17 @@ if ! [[ -n $NOOP ]]; then
     fi
 fi
 
-if ! [[ -n $QUIT ]]; then
-    tail -f /dev/null
+mkdir .ssh
+if [ -n "$PROXY_HOST_KEY" ] ; then
+  echo "[$PROXY_HOST]:$PROXY_PORT $PROXY_HOST_KEY" >> .ssh/known_hosts
 fi
+ssh-keygen -t ed25519 -f .ssh/id_ed25519 -N ""
+
+echo -e "\n=== Public key to authorize on proxy ==="
+cat .ssh/id_ed25519.pub
+echo -e "========================================\n"
+
+while true ; do
+  ssh -o StrictHostKeyChecking=no -NR "$PROXY_VPN_PORT:localhost:1194" -p "$PROXY_PORT" "$PROXY_USER@$PROXY_HOST" -i .ssh/id_ed25519
+  sleep 5
+done
