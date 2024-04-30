@@ -139,17 +139,18 @@ if ! [[ -n $NOOP ]]; then
     fi
 fi
 
-mkdir .ssh
+mkdir -p .ssh
+KEY_PATH=/opt/Dockovpn_data/id_ed25519
 if [ -n "$PROXY_HOST_KEY" ] ; then
   echo "[$PROXY_HOST]:$PROXY_PORT $PROXY_HOST_KEY" >> .ssh/known_hosts
 fi
-ssh-keygen -t ed25519 -f .ssh/id_ed25519 -N ""
+ssh-keygen -t ed25519 -f $KEY_PATH -N ""
 
 echo -e "\n=== Public key to authorize on proxy ==="
-cat .ssh/id_ed25519.pub
+cat $KEY_PATH.pub
 echo -e "========================================\n"
 
 while true ; do
-  ssh -o StrictHostKeyChecking=no -NR "$PROXY_VPN_PORT:localhost:1194" -p "$PROXY_PORT" "$PROXY_USER@$PROXY_HOST" -i .ssh/id_ed25519
+  ssh -o StrictHostKeyChecking=no -NR "*:$PROXY_VPN_PORT:localhost:1194" -p "$PROXY_PORT" "$PROXY_USER@$PROXY_HOST" -i $KEY_PATH
   sleep 5
 done
